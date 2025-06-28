@@ -1,3 +1,9 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html,
 body {
   margin: 0;
@@ -5,19 +11,31 @@ body {
   background-color: #121212;
   color: whitesmoke;
   font-family: "Inter", sans-serif;
-  box-sizing: border-box;
 }
 
 .container {
-  padding: 4rem;
+  padding: 1rem 4rem;
   display: flex;
   justify-content: center;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .hero {
+  width: 100%;
   position: relative;
   display: flex;
   flex-direction: column;
+  background-image: linear-gradient(
+      rgba(18, 18, 18, 0.9),
+      rgba(18, 18, 18, 0.9)
+    ),
+    url("/images/hero.webp");
+  background-size: cover;
+  background-position: 0 -12rem;
+  height: 200px;
+  width: 100vw;
 
   h1 {
     font-size: 3rem;
@@ -37,14 +55,6 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-image: linear-gradient(
-        rgba(18, 18, 18, 0.9),
-        rgba(18, 18, 18, 0.9)
-      ),
-      url("/images/hero.webp");
-    background-size: cover;
-    background-position: 0 -16rem;
-    height: 200px;
   }
 }
 
@@ -56,7 +66,7 @@ body {
   border-radius: 0.375rem;
   overflow: hidden;
   position: relative;
-  top: -5.25rem;
+  top: -2.25rem;
   margin: 0 auto;
   color: #a5a5a5;
   width: 100%;
@@ -117,15 +127,38 @@ body {
   }
 }
 
+.unable-msg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #787878;
+  max-width: 300px;
+  text-align: center;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
 .content-area {
   display: flex;
 
   .container {
     display: flex;
+    flex-direction: column;
   }
 
   .movie-card {
     display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 0;
+    border-bottom: 1.5px solid #2c2c2c;
+    max-width: 750px;
+    gap: 1rem;
+
+    img {
+      width: 100px;
+      height: 150px;
+    }
 
     .movie-info {
       display: flex;
@@ -133,15 +166,53 @@ body {
     }
     .row-1 {
       display: flex;
+      gap: 1rem;
+
+      h2 {
+        font-size: 1.125rem;
+        font-weight: 500;
+      }
+
+      .rating-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.25rem;
+
+        .icon {
+          width: 1rem;
+          height: 1rem;
+          color: #fec654;
+        }
+
+        p {
+          font-size: 0.75rem;
+          font-weight: 400;
+        }
+      }
     }
     .row-2 {
       display: flex;
-    }
-    .watchlist-container {
-      display: flex;
+      gap: 1.25rem;
+      font-size: 0.75rem;
+
+      .icon {
+        fill: whitesmoke;
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+
+      .watchlist-container {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+      }
     }
     .row-3 {
       display: flex;
+      font-size: 0.875rem;
+      color: #a5a5a5;
     }
   }
 }

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta charset="UTF-8" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -42,7 +43,7 @@
           id="search"
           placeholder="Enter movie title..."
         />
-        <button type="submit">Search</button>
+        <button id="search-btn">Search</button>
       </div>
     </div>
 
@@ -145,36 +146,17 @@
       </div>
     </section>
 
-    <!-- <section class="content-area">
-      <div class="container">
-        <div class="movie-card">
-          <img src="" alt="" class="movie-img" />
-          <div class="movie-info">
-            <div class="row-1">
-              <h2 class="title">Blade Runner</h2>
-              <img src="" alt="" class="icon" />
-              <p class="rating">8.1</p>
-            </div>
+    <div class="container">
+      <section class="unable-msg hidden">
+        <p>
+          Unable to find what you're looking for. Please try another search.
+        </p>
+      </section>
+    </div>
 
-            <div class="row-2">
-              <p class="time">116 min</p>
-              <p class="genre">Drama, Mystery, Sci-Fi</p>
-              <div class="watchlist-container">
-                <img src="" alt="" class="icon" />
-                <p class="watchlist">Watchlist</p>
-              </div>
-            </div>
-
-            <div class="row-3">
-              <p class="bio">
-                A blade runner must pursue and terminate four replicants who
-                stole a ship in space, and have returned to Earth to find their
-                creator.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section> -->
+    <section class="content-area">
+      <div class="container" id="movies-div"></div>
+    </section>
+    <script src="script.js"></script>
   </body>
 </html>

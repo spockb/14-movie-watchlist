@@ -1,39 +1,13 @@
-let query;
-let html;
-
-// Handle Search Click
-document.getElementById("search-btn").addEventListener("click", () => {
-  query = document.getElementById("search").value;
-  document.getElementById("search").value = "";
-  fetchMovies(query);
-});
-
-async function fetchMovies(query) {
-  html = "";
-  const res = await fetch(
-    `http://www.omdbapi.com/?&apikey=ee04d355&s=${query}&type=movie`
-  );
-  const movies = await res.json();
-  movies.Search.map(async (movie) => {
-    const res = await fetch(
-      `http://www.omdbapi.com/?apikey=ee04d355&i=${movie.imdbID}`
-    );
-    const imdbMovie = await res.json();
-    renderMovies(imdbMovie);
-    console.log(imdbMovie);
-  });
-}
-function renderMovies(movie) {
-  html += `<div class="movie-card">
+<div class="movie-card">
   <img
-    src="${movie.Poster}"
-    alt="${movie.Title}"
+    src="https://m.media-amazon.com/images/M/MV5BOWQ4YTBmNTQtMDYxMC00NGFjLTkwOGQtNzdhNmY1Nzc1MzUxXkEyXkFqcGc@._V1_SX300.jpg"
+    alt=""
     class="movie-img"
   />
   <div class="movie-info">
     <div class="row-1">
-      <h2 class="title">${movie.Title}</h2>
-      <p>(${movie.Year})</p>
+      <h2 class="title">Blade Runner</h2>
+      <p>(1982)</p>
       <div class="rating-container">
         <span class="icon">
           <svg
@@ -55,13 +29,13 @@ function renderMovies(movie) {
             </g>
           </svg>
         </span>
-        <p class="rating">${movie.Ratings[0].Value}</p>
+        <p class="rating">8.1</p>
       </div>
     </div>
 
     <div class="row-2">
       <p class="time">116 min</p>
-      <p class="genre">${movie.Genre}</p>
+      <p class="genre">Drama, Mystery, Sci-Fi</p>
       <div class="watchlist-container">
         <span class="icon">
           <svg
@@ -92,14 +66,9 @@ function renderMovies(movie) {
 
     <div class="row-3">
       <p class="bio">
-        ${movie.Plot}
+        A blade runner must pursue and terminate four replicants who stole a
+        ship in space, and have returned to Earth to find their creator.
       </p>
     </div>
   </div>
-</div>`;
-  updateDOM();
-}
-
-function updateDOM() {
-  document.getElementById("movies-div").innerHTML = html;
-}
+</div>;
