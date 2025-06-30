@@ -72,14 +72,14 @@ function renderMovieCard(movie) {
           </g>
         </svg>
       </span>
-      <p class="rating">${movie.Ratings[0].Value}</p>
+      <p class="rating">${movie.imdbRating}</p>
     </div>
   </div>
 
   <div class="row-2">
     <p class="time">116 min</p>
     <p class="genre">${movie.Genre}</p>
-    <div class="watchlist-container">
+    <div class="watchlist-container" data-imdbid="${movie.imdbID}">
       <span class="icon">
         <svg
           viewBox="0 0 24 24"
@@ -116,6 +116,73 @@ function renderMovieCard(movie) {
   </div>`;
 }
 
+async function renderWatchlist() {
+  const local = localStorage.getItem("watchlist");
+  const watchlist = local ? JSON.parse(local) : [];
+
+  const movieDetails = await Promise.all(
+    watchlist.map((imdbID) => fetchMovieDetails(imdbID))
+  );
+  const html = movieDetails.map(renderWatchlistMovieCard).join("");
+  updateDOM(html);
+}
+
+function renderWatchlistMovieCard(movie) {
+  return `<div class="movie-card">
+<img
+  src="${movie.Poster}"
+  alt="${movie.Title}"
+  class="movie-img"
+/>
+<div class="movie-info">
+  <div class="row-1">
+    <h2 class="title">${movie.Title}</h2>
+    <p>(${movie.Year})</p>
+    <div class="rating-container">
+      <span class="icon">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+          <g
+            id="SVGRepo_tracurrentColorerCarrier"
+            stroke-linecurrentcap="round"
+            stroke-linejoin="round"
+          ></g>
+          <g id="SVGRepo_icurrentColoronCarrier">
+            <path
+              d="m12 17.328-5.403 3.286a.75.75 0 0 1-1.12-.813l1.456-6.155-4.796-4.123a.75.75 0 0 1 .428-1.316l6.303-.517 2.44-5.835a.75.75 0 0 1 1.384 0l2.44 5.835 6.303.517a.75.75 0 0 1 .427 1.316l-4.795 4.123 1.456 6.155a.75.75 0 0 1-1.12.813L12 17.328z"
+              fill="currentColor"
+            ></path>
+          </g>
+        </svg>
+      </span>
+      <p class="rating">${movie.imdbRating}</p>
+    </div>
+  </div>
+
+  <div class="row-2">
+    <p class="time">116 min</p>
+    <p class="genre">${movie.Genre}</p>
+    <div class="watchlist-container" data-remove="${movie.imdbID}">
+      <span class="icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM15.75 12C15.75 12.4142 15.4142 12.75 15 12.75H9C8.58579 12.75 8.25 12.4142 8.25 12C8.25 11.5858 8.58579 11.25 9 11.25H15C15.4142 11.25 15.75 11.5858 15.75 12Z" fill="currentColor"></path> </g></svg>
+      </span>
+      <p class="watchlist">Remove From Watchlist</p>
+    </div>
+  </div>
+
+  <div class="row-3">
+    <p class="bio">
+      ${movie.Plot}
+    </p>
+  </div>
+</div>
+  </div>`;
+}
+
 function updateDOM(html) {
   document.getElementById("movies-div").innerHTML = html;
   const hasVisibleContent = html && html.trim() !== "";
@@ -123,4 +190,43 @@ function updateDOM(html) {
   document
     .getElementById("unable-msg")
     .classList.toggle("hidden", hasVisibleContent);
+  console.log("hasVisibleContent:", hasVisibleContent);
 }
+
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".watchlist-container");
+  if (btn.dataset.imdbid) {
+    addToWatchlist(btn.dataset.imdbid);
+  } else if (btn.dataset.remove) {
+    removeFromWatchlist(btn.dataset.remove);
+  } else {
+    return;
+  }
+});
+
+function addToWatchlist(imdbID) {
+  const local = localStorage.getItem("watchlist");
+  const watchlist = local ? JSON.parse(local) : [];
+
+  if (!watchlist.includes(imdbID)) {
+    watchlist.push(imdbID);
+    localStorage.setItem("watchlist", JSON.stringify(watchlist));
+  }
+}
+
+function removeFromWatchlist(imdbID) {
+  const local = localStorage.getItem("watchlist");
+  const watchlist = local ? JSON.parse(local) : [];
+  const updated = watchlist.filter((id) => id !== imdbID);
+  localStorage.setItem("watchlist", JSON.stringify(updated));
+  renderWatchlist(updated);
+}
+
+document.getElementById("watchlist-btn").addEventListener("click", () => {
+  renderWatchlist();
+  document.getElementById("start-exploring").classList.add("hidden");
+});
+
+// watchlist button renders all the items in the watchlist array in local storage but with remove from watchlist button. START ON REMOVE FROM WATCHLIST BUTTON
+
+// STRETCH if watchlist includes imdbID then button changes on movie card
