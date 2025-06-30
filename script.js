@@ -49,7 +49,7 @@ function getWatchlist() {
 async function fetchMovies(query) {
   try {
     const res = await fetch(
-      `http://www.omdbapi.com/?&apikey=ee04d355&s=${query}&type=movie`
+      `https://www.omdbapi.com/?&apikey=ee04d355&s=${query}&type=movie`
     );
     const data = await res.json();
 
@@ -71,7 +71,7 @@ async function fetchMovies(query) {
 
 async function fetchMovieDetails(imdbID) {
   const res = await fetch(
-    `http://www.omdbapi.com/?apikey=ee04d355&i=${imdbID}`
+    `https://www.omdbapi.com/?apikey=ee04d355&i=${imdbID}`
   );
   return res.json();
 }
