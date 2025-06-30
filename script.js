@@ -1,50 +1,51 @@
+document.getElementById("search-btn").addEventListener("click", () => {
+  const searchInput = document.getElementById("search");
+  const query = searchInput.value.trim();
+
+  if (!query) return;
+
+  document.getElementById("start-exploring").classList.add("hidden");
+  searchInput.value = "";
+
+  fetchMovies(query);
+});
+
+document.getElementById("watchlist-btn").addEventListener("click", () => {
+  renderWatchlist();
+  document.getElementById("start-exploring").classList.add("hidden");
+});
+
 document.addEventListener("click", (e) => {
-  const addRemoveWatchlistBtn = e.target.closest(".watchlist-container");
-  const renderWatchlistBtn = e.target.closest("#watchlist-btn");
-  const searchBtn = e.target.closest("#search-btn");
-  if (searchBtn) {
-    const searchInput = document.getElementById("search");
-    const query = searchInput.value.trim();
+  const btn = e.target.closest(".watchlist-container");
+  if (!btn) return;
 
-    if (!query) return;
-
-    document.getElementById("start-exploring").classList.add("hidden");
-    document.getElementById("search").value = "";
-
-    fetchMovies(query);
-  }
-
-  if (addRemoveWatchlistBtn) {
-    const local = localStorage.getItem("watchlist");
-    let watchlist = local ? JSON.parse(local) : [];
-    const imdbID = addRemoveWatchlistBtn.dataset.imdbid;
+  if (btn) {
+    let watchlist = getWatchlist();
+    const imdbID = btn.dataset.imdbid;
     const isSaved = watchlist.includes(imdbID);
 
     if (isSaved) {
       watchlist = watchlist.filter((id) => id !== imdbID);
-      addRemoveWatchlistBtn.querySelector(
+      btn.querySelector(
         ".icon"
       ).innerHTML = `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M10 1H6V6L1 6V10H6V15H10V10H15V6L10 6V1Z" fill="currentColor"></path> </g></svg>`;
-      addRemoveWatchlistBtn.querySelector(".watchlist").textContent =
-        "Add to Watchlist";
+      btn.querySelector(".watchlist").textContent = "Add to Watchlist";
     } else {
       watchlist.push(imdbID);
-      addRemoveWatchlistBtn.querySelector(
+      btn.querySelector(
         ".icon"
       ).innerHTML = `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M1 10L1 6L15 6V10L1 10Z" fill="currentColor"></path> </g></svg>`;
-      addRemoveWatchlistBtn.querySelector(".watchlist").textContent =
-        "Remove from Watchlist";
+      btn.querySelector(".watchlist").textContent = "Remove from Watchlist";
     }
 
     localStorage.setItem("watchlist", JSON.stringify(watchlist));
   }
-
-  if (renderWatchlistBtn) {
-    renderWatchlist();
-    document.getElementById("start-exploring").classList.add("hidden");
-  } else return;
 });
 
+function getWatchlist() {
+  const local = localStorage.getItem("watchlist");
+  return local ? JSON.parse(local) : [];
+}
 async function fetchMovies(query) {
   try {
     const res = await fetch(
@@ -72,12 +73,11 @@ async function fetchMovieDetails(imdbID) {
   const res = await fetch(
     `http://www.omdbapi.com/?apikey=ee04d355&i=${imdbID}`
   );
-  return await res.json();
+  return res.json();
 }
 
 function renderMovieCard(movie) {
-  const local = localStorage.getItem("watchlist");
-  const watchlist = local ? JSON.parse(local) : [];
+  const watchlist = getWatchlist();
   const isSaved = watchlist.includes(movie.imdbID);
 
   const watchlistText = isSaved ? "Remove from Watchlist" : "Add to Watchlist";
@@ -141,8 +141,7 @@ function renderMovieCard(movie) {
 }
 
 async function renderWatchlist() {
-  const local = localStorage.getItem("watchlist");
-  const watchlist = local ? JSON.parse(local) : [];
+  const watchlist = getWatchlist();
 
   const movieDetails = await Promise.all(
     watchlist.map((imdbID) => fetchMovieDetails(imdbID))
@@ -158,5 +157,4 @@ function updateDOM(html) {
   document
     .getElementById("unable-msg")
     .classList.toggle("hidden", hasVisibleContent);
-  console.log("hasVisibleContent:", hasVisibleContent);
 }
