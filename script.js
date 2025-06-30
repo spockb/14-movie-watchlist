@@ -1,13 +1,48 @@
-document.getElementById("search-btn").addEventListener("click", () => {
-  const searchInput = document.getElementById("search");
-  const query = searchInput.value.trim();
+document.addEventListener("click", (e) => {
+  const addRemoveWatchlistBtn = e.target.closest(".watchlist-container");
+  const renderWatchlistBtn = e.target.closest("#watchlist-btn");
+  const searchBtn = e.target.closest("#search-btn");
+  if (searchBtn) {
+    const searchInput = document.getElementById("search");
+    const query = searchInput.value.trim();
 
-  if (!query) return;
+    if (!query) return;
 
-  document.getElementById("start-exploring").classList.add("hidden");
-  document.getElementById("search").value = "";
+    document.getElementById("start-exploring").classList.add("hidden");
+    document.getElementById("search").value = "";
 
-  fetchMovies(query);
+    fetchMovies(query);
+  }
+
+  if (addRemoveWatchlistBtn) {
+    const local = localStorage.getItem("watchlist");
+    let watchlist = local ? JSON.parse(local) : [];
+    const imdbID = addRemoveWatchlistBtn.dataset.imdbid;
+    const isSaved = watchlist.includes(imdbID);
+
+    if (isSaved) {
+      watchlist = watchlist.filter((id) => id !== imdbID);
+      addRemoveWatchlistBtn.querySelector(
+        ".icon"
+      ).innerHTML = `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M10 1H6V6L1 6V10H6V15H10V10H15V6L10 6V1Z" fill="currentColor"></path> </g></svg>`;
+      addRemoveWatchlistBtn.querySelector(".watchlist").textContent =
+        "Add to Watchlist";
+    } else {
+      watchlist.push(imdbID);
+      addRemoveWatchlistBtn.querySelector(
+        ".icon"
+      ).innerHTML = `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M1 10L1 6L15 6V10L1 10Z" fill="currentColor"></path> </g></svg>`;
+      addRemoveWatchlistBtn.querySelector(".watchlist").textContent =
+        "Remove from Watchlist";
+    }
+
+    localStorage.setItem("watchlist", JSON.stringify(watchlist));
+  }
+
+  if (renderWatchlistBtn) {
+    renderWatchlist();
+    document.getElementById("start-exploring").classList.add("hidden");
+  } else return;
 });
 
 async function fetchMovies(query) {
@@ -41,6 +76,15 @@ async function fetchMovieDetails(imdbID) {
 }
 
 function renderMovieCard(movie) {
+  const local = localStorage.getItem("watchlist");
+  const watchlist = local ? JSON.parse(local) : [];
+  const isSaved = watchlist.includes(movie.imdbID);
+
+  const watchlistText = isSaved ? "Remove from Watchlist" : "Add to Watchlist";
+  const watchlistIcon = isSaved
+    ? `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M1 10L1 6L15 6V10L1 10Z" fill="currentColor"></path> </g></svg>`
+    : `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M10 1H6V6L1 6V10H6V15H10V10H15V6L10 6V1Z" fill="currentColor"></path> </g></svg>`;
+
   return `<div class="movie-card">
 <img
   src="${movie.Poster}"
@@ -81,29 +125,9 @@ function renderMovieCard(movie) {
     <p class="genre">${movie.Genre}</p>
     <div class="watchlist-container" data-imdbid="${movie.imdbID}">
       <span class="icon">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-          <g
-            id="SVGRepo_tracerCarrier"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></g>
-          <g id="SVGRepo_iconCarrier">
-            <rect width="24" height="24" fill="none"></rect>
-            <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M13 9C13 8.44772 12.5523 8 12 8C11.4477 8 11 8.44772 11 9V11H9C8.44772 11 8 11.4477 8 12C8 12.5523 8.44772 13 9 13H11V15C11 15.5523 11.4477 16 12 16C12.5523 16 13 15.5523 13 15V13H15C15.5523 13 16 12.5523 16 12C16 11.4477 15.5523 11 15 11H13V9ZM2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12Z"
-              fill="currentColor"
-            ></path>
-          </g>
-        </svg>
+        ${watchlistIcon}
       </span>
-      <p class="watchlist">Watchlist</p>
+      <p class="watchlist">${watchlistText}</p>
     </div>
   </div>
 
@@ -123,64 +147,8 @@ async function renderWatchlist() {
   const movieDetails = await Promise.all(
     watchlist.map((imdbID) => fetchMovieDetails(imdbID))
   );
-  const html = movieDetails.map(renderWatchlistMovieCard).join("");
+  const html = movieDetails.map(renderMovieCard).join("");
   updateDOM(html);
-}
-
-function renderWatchlistMovieCard(movie) {
-  return `<div class="movie-card">
-<img
-  src="${movie.Poster}"
-  alt="${movie.Title}"
-  class="movie-img"
-/>
-<div class="movie-info">
-  <div class="row-1">
-    <h2 class="title">${movie.Title}</h2>
-    <p>(${movie.Year})</p>
-    <div class="rating-container">
-      <span class="icon">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-          <g
-            id="SVGRepo_tracurrentColorerCarrier"
-            stroke-linecurrentcap="round"
-            stroke-linejoin="round"
-          ></g>
-          <g id="SVGRepo_icurrentColoronCarrier">
-            <path
-              d="m12 17.328-5.403 3.286a.75.75 0 0 1-1.12-.813l1.456-6.155-4.796-4.123a.75.75 0 0 1 .428-1.316l6.303-.517 2.44-5.835a.75.75 0 0 1 1.384 0l2.44 5.835 6.303.517a.75.75 0 0 1 .427 1.316l-4.795 4.123 1.456 6.155a.75.75 0 0 1-1.12.813L12 17.328z"
-              fill="currentColor"
-            ></path>
-          </g>
-        </svg>
-      </span>
-      <p class="rating">${movie.imdbRating}</p>
-    </div>
-  </div>
-
-  <div class="row-2">
-    <p class="time">116 min</p>
-    <p class="genre">${movie.Genre}</p>
-    <div class="watchlist-container" data-remove="${movie.imdbID}">
-      <span class="icon">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM15.75 12C15.75 12.4142 15.4142 12.75 15 12.75H9C8.58579 12.75 8.25 12.4142 8.25 12C8.25 11.5858 8.58579 11.25 9 11.25H15C15.4142 11.25 15.75 11.5858 15.75 12Z" fill="currentColor"></path> </g></svg>
-      </span>
-      <p class="watchlist">Remove From Watchlist</p>
-    </div>
-  </div>
-
-  <div class="row-3">
-    <p class="bio">
-      ${movie.Plot}
-    </p>
-  </div>
-</div>
-  </div>`;
 }
 
 function updateDOM(html) {
@@ -192,41 +160,3 @@ function updateDOM(html) {
     .classList.toggle("hidden", hasVisibleContent);
   console.log("hasVisibleContent:", hasVisibleContent);
 }
-
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest(".watchlist-container");
-  if (btn.dataset.imdbid) {
-    addToWatchlist(btn.dataset.imdbid);
-  } else if (btn.dataset.remove) {
-    removeFromWatchlist(btn.dataset.remove);
-  } else {
-    return;
-  }
-});
-
-function addToWatchlist(imdbID) {
-  const local = localStorage.getItem("watchlist");
-  const watchlist = local ? JSON.parse(local) : [];
-
-  if (!watchlist.includes(imdbID)) {
-    watchlist.push(imdbID);
-    localStorage.setItem("watchlist", JSON.stringify(watchlist));
-  }
-}
-
-function removeFromWatchlist(imdbID) {
-  const local = localStorage.getItem("watchlist");
-  const watchlist = local ? JSON.parse(local) : [];
-  const updated = watchlist.filter((id) => id !== imdbID);
-  localStorage.setItem("watchlist", JSON.stringify(updated));
-  renderWatchlist(updated);
-}
-
-document.getElementById("watchlist-btn").addEventListener("click", () => {
-  renderWatchlist();
-  document.getElementById("start-exploring").classList.add("hidden");
-});
-
-// watchlist button renders all the items in the watchlist array in local storage but with remove from watchlist button. START ON REMOVE FROM WATCHLIST BUTTON
-
-// STRETCH if watchlist includes imdbID then button changes on movie card
